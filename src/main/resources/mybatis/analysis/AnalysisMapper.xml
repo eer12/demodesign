@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.polycis.modules.analysis.dao.AnalysisMapper">
+
+
+    <select id="selectAnalysisParameter" resultType="cn.com.polycis.modules.analysis.entity.AnalysisParameter">
+      SELECT ap.*
+      FROM analysis_rule ar
+      LEFT JOIN analysis_parameter ap ON  ap.analysis_id=ar.id
+      WHERE ar.app_id =#{param1}
+      and  ar.instruct=#{param2}
+      order by ap.id asc
+
+
+
+    </select>
+    <select id="selectAnalysisRoleCount" resultType="java.lang.Integer">
+        SELECT count(*)
+        FROM analysis_rule
+        WHERE app_id=#{appId}
+
+
+    </select>
+    <select id="selectAnalysisRoleList" resultType="cn.com.polycis.modules.analysis.entity.AnalysisRule">
+
+        SELECT *
+        FROM analysis_rule
+        WHERE  app_id=#{appId}
+
+    </select>
+
+
+    <select id="selectAnalysisParameterByRuleId"
+            resultType="cn.com.polycis.modules.analysis.entity.AnalysisParameter">
+        SELECT *
+        FROM analysis_parameter
+        WHERE analysis_id=#{analysisRuleId}
+
+
+    </select>
+    <select id="selectAnalysisRole" resultType="cn.com.polycis.modules.analysis.entity.AnalysisRule">
+        SELECT *
+        FROM analysis_rule
+        WHERE
+        app_id=#{param1}
+        and instruct=#{param2}
+
+    </select>
+</mapper>

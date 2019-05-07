@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.polycis.modules.application.dao.MqInfoMapper">
+
+
+
+
+
+    <resultMap id="baseMap" type="cn.com.polycis.modules.application.entity.AppMqVO">
+        <id property="appid" column="id"/>
+        <result property="name" column="name"/>
+        <collection property="datalist" ofType="cn.com.polycis.modules.application.entity.MqInfoForAPI">
+            <id property="id" column="mqId"/>
+            <result property="name" column="mqName"/>
+            <result property="queue" column="topic"/>
+            <result property="host" column="ip"/>
+            <result property="port" column="port"/>
+            <result property="login" column="username"/>
+            <result property="password" column="password"/>
+            <result property="type" column="type"/>
+            <result property="status" column="is_start"/>
+            <result property="createTime" column="create_time"/>
+        </collection>
+    </resultMap>
+    <select id="selectAppVOList" resultMap="baseMap" >
+
+        SELECT
+        lmi.id as mqId,
+        lmi.name as mqName,
+        lmi.topic,
+        lmi.ip,
+        lmi.port,
+        lmi.username,
+        lmi.password,
+        lmi.password,
+        lmi.is_start,
+        lmi.create_time,
+        ai.id,
+        ai.name
+        FROM lo_mq_info lmi
+        LEFT JOIN lo_app_info ai ON ai.id=lmi.app_id
+        WHERE lmi.is_delete=1
+        <if test="appid == null">
+            and ai.id in
+            (
+            SELECT lai.id FROM lo_app_info lai
+            WHERE lai.id IN
+            (
+            SELECT laor.app_id FROM lo_app_organization_relation laor
+            WHERE laor.organization_id = (
+            SELECT u.org FROM lo_users u WHERE u.id=#{userid}
+            )
+            )
+            and lai.is_delete =1
+            )
+        </if>
+        <if test="appid != null">
+            and ai.id =#{appid}
+        </if>
+
+    </select>
+    <select id="selectAppVOListCount" resultType="java.lang.Integer">
+
+        SELECT
+        count(*)
+        FROM lo_mq_info lmi
+        LEFT JOIN lo_app_info ai ON ai.id=lmi.app_id
+        WHERE lmi.is_delete=1
+        <if test="appid == null">
+            and ai.id in
+            (
+            SELECT lai.id FROM lo_app_info lai
+            WHERE lai.id IN
+            (
+            SELECT laor.app_id FROM lo_app_organization_relation laor
+            WHERE laor.organization_id = (
+            SELECT u.org FROM lo_users u WHERE u.id=#{userid}
+            )
+            )
+            and lai.is_delete =1
+            )
+        </if>
+        <if test="appid != null">
+            and ai.id =#{appid}
+        </if>
+
+
+    </select>
+</mapper>

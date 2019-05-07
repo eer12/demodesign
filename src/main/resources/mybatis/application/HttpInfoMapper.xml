@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.polycis.modules.application.dao.HttpInfoMapper">
+
+
+    <select id="selectHttpInfoList" resultType="cn.com.polycis.modules.application.entity.HttpInfo">
+
+        SELECT hi.* FROM
+        lo_app_info ai
+        LEFT JOIN lo_http_info hi ON hi.app_id=ai.id
+        WHERE ai.id=#{appId}
+        and hi.is_delete=1
+        <if test="query != null and query != ''">
+            AND (hi.name LIKE '%${query}%' or hi.token LIKE '%${query}%' or hi.url LIKE '%${query}%'
+            or hi.key LIKE '%${query}%'
+            )
+        </if>
+        order by hi.create_time desc
+        limit #{pageNumber},#{pageSize}
+    </select>
+
+
+
+    <resultMap id="baseMap" type="cn.com.polycis.modules.application.entity.AppHttpVO">
+        <id property="appid" column="id"/>
+        <result property="name" column="name"/>
+        <collection property="datalist" ofType="cn.com.polycis.modules.application.entity.HttpInfoForAPI">
+            <id property="id" column="httpId"/>
+            <result property="name" column="httpName"/>
+            <result property="url" column="url"/>
+            <result property="type" column="type"/>
+            <result property="status" column="is_start"/>
+            <result property="createTime" column="create_time"/>
+        </collection>
+    </resultMap>
+
+
+
+</mapper>

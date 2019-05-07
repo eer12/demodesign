@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.polycis.modules.user.dao.UsersMapper">
+
+    <!--&lt;!&ndash; 开启二级缓存 &ndash;&gt;-->
+    <!--<cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>-->
+
+    <select id="selectSysUserByOrgId" resultType="cn.com.polycis.modules.user.entity.Users">
+
+        SELECT *
+        FROM lo_users
+        WHERE
+        role like '%sys%'
+        AND org = #{organizationId}
+        and is_delete=1
+        limit 0,1
+
+
+    </select>
+
+</mapper>

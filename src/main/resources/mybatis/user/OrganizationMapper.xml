@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.polycis.modules.user.dao.OrganizationMapper">
+
+
+    <select id="selectOrgAndSysList" resultType="java.util.Map">
+
+        SELECT lo.*,
+        lu.nb_network_id,
+        lu.lora_network_id,
+        lu.twog_network_id
+        FROM lo_organization lo
+        LEFT JOIN lo_users lu ON lu.org=lo.id
+        WHERE lo.is_delete=1
+        <if test="organization.name !=null and organization.name!=''">
+           AND lo.name LIKE '%${organization.name}%'
+        </if>
+        limit #{pageNum},#{pageSize}
+
+
+
+
+    </select>
+    <select id="selectOrgAndSysListCount" resultType="java.lang.Integer">
+
+        SELECT count(*)
+        FROM lo_organization lo
+        LEFT JOIN lo_users lu ON lu.org=lo.id
+        WHERE lo.is_delete=1
+        <if test="organization.name !=null and organization.name!=''">
+            AND lo.name LIKE '%${organization.name}%'
+        </if>
+
+    </select>
+    <select id="selectOrgByAppId" resultType="java.lang.Integer">
+        SELECT organization_id
+        FROM lo_app_organization_relation
+        WHERE app_id =#{appId}
+    </select>
+</mapper>

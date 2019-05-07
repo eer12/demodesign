@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.polycis.modules.application.dao.AppInfoMapper">
+    <insert id="insertAppOrgRe">
+        INSERT INTO lo_app_organization_relation
+        (app_id,organization_id,create_time)
+        VALUES (#{param1},#{param2},NOW())
+    </insert>
+    <insert id="insertBachAppDevRe">
+        INSERT INTO lo_app_device_relation
+        (app_id,device_id,create_time)
+        VALUES
+        <foreach collection="arg1" item="var" separator=",">
+            (#{arg0}, #{var}, NOW())
+        </foreach>
+
+
+    </insert>
+
+
+
+
+
+    <delete id="deleteAppOrganizationRelation">
+       DELETE aor  FROM lo_app_organization_relation aor
+       WHERE aor.app_id=#{param1}
+       and aor.organization_id=#{param2}
+
+
+    </delete>
+    <delete id="deleteAppDevRe">
+        DELETE adr FROM lo_app_device_relation adr
+        WHERE adr.device_id
+        <foreach collection="list" index="index" item="var" open="(" separator="," close=")">
+            #{var.}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteAppDevRelation">
+        DELETE adr FROM lo_app_device_relation adr
+        WHERE  adr.device_id =#{param2}
+        and adr.app_id=#{param1}
+
+    </delete>
+
+
+    <select id="selectAppList" resultType="cn.com.polycis.modules.application.entity.AppInfo">
+
+        SELECT * FROM lo_app_info lai
+        WHERE lai.id IN
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE laor.organization_id = (
+        SELECT u.org FROM lo_users u WHERE u.id=#{userId}
+        )
+        )
+        and lai.is_delete =1
+        <if test="query != null and query != ''">
+            AND (lai.name LIKE '%${query}%' or lai.eui LIKE '%${query}%'
+            )
+        </if>
+
+        limit #{pageNumber},#{pageSize}
+
+    </select>
+    <select id="selectAppListCount" resultType="java.lang.Integer">
+        SELECT count(*) FROM lo_app_info lai
+        WHERE lai.id IN
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE laor.organization_id = (
+        SELECT u.org FROM lo_users u WHERE u.id=#{userId}
+        )
+        )
+        and lai.is_delete =1
+        <if test="query != null and query != ''">
+            AND (lai.name LIKE '%${query}%' or lai.eui LIKE '%${query}%'
+            )
+        </if>
+
+    </select>
+
+    <select id="selectAppInfo" resultType="cn.com.polycis.modules.application.entity.AppInfo">
+        SELECT * FROM lo_app_info
+        WHERE id=#{appId}
+        and is_delete=1
+    </select>
+    <select id="selectHttpCountByUserId" resultType="java.lang.Integer">
+
+        SELECT COUNT(*)
+        FROM
+        lo_http_info
+        WHERE app_id IN (
+         SELECT lai.id FROM lo_app_info lai
+        WHERE lai.id IN
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE  laor.organization_id = (
+        SELECT u.org FROM lo_users u WHERE u.id=#{id}
+        )
+        )
+      )
+
+
+
+    </select>
+    <select id="selectMqCountByUserId" resultType="java.lang.Integer">
+
+        SELECT COUNT(*)
+        FROM
+        lo_mq_info
+        WHERE app_id IN (
+         SELECT lai.id FROM lo_app_info lai
+        WHERE lai.id IN
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE  laor.organization_id = (
+        SELECT u.org FROM lo_users u WHERE u.id=#{id}
+        )
+        )
+      )
+
+
+    </select>
+    <select id="selectAppDevReCount" resultType="java.lang.Integer">
+
+        SELECT count(*)
+        FROM lo_app_device_relation
+        WHERE app_id=#{id}
+
+    </select>
+    <select id="selectAppListNoPage" resultType="cn.com.polycis.modules.application.entity.AppInfo">
+
+        SELECT * FROM lo_app_info lai
+        WHERE lai.id IN
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE laor.organization_id = (
+        SELECT u.org FROM lo_users u WHERE u.id=#{userId}
+        )
+        )
+        and lai.is_delete =1
+
+    </select>
+
+
+    <select id="selectAppIdByorgId" resultType="java.lang.Integer">
+        SELECT id FROM lo_app_info
+        WHERE organization_id=#{orgId}
+        AND is_delete=1
+    </select>
+    <select id="selectTotalList" resultType="cn.com.polycis.modules.application.entity.AppInfo">
+        SELECT * FROM lo_app_info
+        WHERE is_delete=1
+        <if test="query != null and query != ''">
+            AND (name LIKE '%${query}%' or eui LIKE '%${query}%'
+            )
+        </if>
+        limit #{pageNumber},#{pageSize}
+    </select>
+    <select id="selectAllAppId" resultType="java.lang.Integer">
+        SELECT id FROM lo_app_info
+        WHERE  is_delete=1
+    </select>
+
+
+    <select id="selectTotalCount" resultType="java.lang.Integer">
+        SELECT count(*) FROM lo_app_info
+        WHERE is_delete=1
+        <if test="query != null and query != ''">
+            AND (name LIKE '%${query}%' or eui LIKE '%${query}%'
+            )
+        </if>
+
+    </select>
+    <select id="selectAppListForAllUser" resultType="cn.com.polycis.modules.application.entity.AppInfo">
+
+        SELECT * FROM lo_app_info lai
+        WHERE lai.id IN
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE laor.organization_id = (
+        SELECT u.org FROM lo_users u WHERE u.id
+        IN
+        <if test="data.applist !=null and data.applist != ''">
+            <foreach collection="data.applist" index="index" item="var" open="(" separator="," close=")">
+                #{var}
+            </foreach>
+        </if>
+        <if test="data.applist ==null ">
+            select id from lo_users
+        </if>
+
+        )
+        )
+        and lai.is_delete =1
+    </select>
+
+
+    <select id="selectForApplist" resultType="cn.com.polycis.modules.application.entity.AppInfo">
+        SELECT * FROM
+        (
+        SELECT * FROM lo_app_info lai
+        WHERE lai.id IN
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE laor.organization_id = (
+        SELECT u.org FROM lo_users u WHERE u.id=#{data.userid}
+        )
+        )
+        and lai.is_delete =1
+        ) aaaa
+        WHERE aaaa.id IN
+        <foreach collection="data.applist" index="index" item="var" open="(" separator="," close=")">
+            #{var}
+        </foreach>
+        limit #{data.pageNumber},#{data.pageSize}
+
+    </select>
+    <select id="selectForApplistCount" resultType="java.lang.Integer">
+        SELECT count(*) FROM
+        (
+        SELECT * FROM lo_app_info lai
+        WHERE lai.id IN
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE laor.organization_id = (
+        SELECT u.org FROM lo_users u WHERE u.id=#{data.userid}
+        )
+        )
+        and lai.is_delete =1
+        ) aaaa
+        WHERE aaaa.id IN
+        <foreach collection="data.applist" index="index" item="var" open="(" separator="," close=")">
+            #{var}
+        </foreach>
+
+
+    </select>
+    <select id="selectForAPI" resultType="cn.com.polycis.modules.application.entity.AppInfo">
+
+         SELECT * FROM lo_app_info lai
+        WHERE lai.id IN
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE laor.organization_id = (
+        SELECT u.org FROM lo_users u WHERE u.id=#{data.userid}
+        )
+        )
+        and lai.is_delete =1
+        limit #{data.pageNumber},#{data.pageSize}
+
+    </select>
+    <select id="selectForAPICount" resultType="java.lang.Integer">
+         SELECT count(*) FROM lo_app_info lai
+        WHERE lai.id IN
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE laor.organization_id = (
+        SELECT u.org FROM lo_users u WHERE u.id=#{data.userid}
+        )
+        )
+        and lai.is_delete =1
+
+
+    </select>
+    <select id="selectAppIsUser" resultType="java.lang.Integer">
+        SELECT count(*) FROM
+        (
+        SELECT * FROM lo_app_info lai
+        WHERE lai.id IN
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE laor.organization_id = (
+        SELECT u.org FROM lo_users u WHERE u.id=#{user.userid}
+        )
+        )
+        and lai.is_delete =1
+        ) aaaa
+        WHERE aaaa.id =#{data.appid}
+    </select>
+    <select id="selectAppIsIsUser" resultType="java.lang.Integer">
+          SELECT count(*) FROM
+        (
+        SELECT * FROM lo_app_info lai
+        WHERE lai.id IN
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE laor.organization_id = (
+        SELECT u.org FROM lo_users u WHERE u.id=#{param1}
+        )
+        )
+        and lai.is_delete =1
+        ) aaaa
+        WHERE aaaa.id =#{param2}
+
+
+    </select>
+    <select id="selectAppListByOrg" resultType="cn.com.polycis.modules.application.entity.AppInfo">
+
+       SELECT * FROM lo_app_info lai
+        WHERE lai.id IN
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE laor.organization_id = #{orgId}
+
+        )
+
+    </select>
+
+
+    <resultMap id="baseMAP" type="cn.com.polycis.modules.application.entity.AppDevVo">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"></result>
+        <collection property="deviceInfoList" ofType="cn.com.polycis.modules.dev.entity.DeviceInfo">
+            <id property="id" column="devId"></id>
+            <result property="deviceUuid" column="device_uuid"></result>
+            <result property="name" column="devName"></result>
+            <result property="status" column="status"></result>
+        </collection>
+    </resultMap>
+    <select id="selectappToDecTopology" resultMap="baseMAP">
+        SELECT
+        lai.id,
+        lai.name,
+        ldi.id as devId,
+        ldi.device_uuid,
+        ldi.name as devName,
+        ldi.status
+        FROM lo_app_info lai
+        LEFT JOIN lo_device_info ldi on ldi.app_id =lai.id
+        WHERE
+        ldi.is_delete=1
+        AND  lai.id=#{appId}
+    </select>
+
+</mapper>

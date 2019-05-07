@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.polycis.modules.dev.dao.DeviceUplinkDataMapper">
+
+
+
+    <select id="selectDevUpDataCount" resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM lo_app_info lai
+        LEFT JOIN lo_device_info ldi ON ldi.app_id =lai.id
+        where lai.is_delete =1
+        <if test="appid !=null and  appid !=''">
+            AND lai.id =#{appid}
+        </if>
+        <if test="appid ==null or  appid ==''">
+            AND lai.id IN (
+            SELECT lai.id FROM lo_app_info lai
+            WHERE lai.id IN
+            (
+            SELECT laor.app_id FROM lo_app_organization_relation laor
+            WHERE laor.organization_id = (
+            SELECT u.org FROM lo_users u WHERE u.id=#{userid}
+            )
+            )
+            and lai.is_delete =1
+            )
+        </if>
+        <if test="datalist !=null and !datalist.equals('') and datalist.size>0">
+            and ldi.device_uuid IN
+            <foreach collection="datalist"  item="var" open="(" separator="," close=")">
+                #{var}
+            </foreach>
+        </if>
+    </select>
+    <select id="selectDevUpDataList" resultType="cn.com.polycis.modules.dev.entity.DataList">
+         SELECT
+        ldi.name as deviceName,
+        ldud.info as data,
+        ldud.device_uuid as devEUI,
+        ldud.create_time as  time
+        FROM lo_device_info ldi
+        LEFT JOIN lo_device_uplink_data ldud ON  ldud.device_uuid=ldi.device_uuid
+        WHERE ldi.device_uuid=#{param1}
+        order by ldud.create_time desc
+        limit 0,#{param2}
+    </select>
+
+
+    <select id="selectUpDataList" resultType="cn.com.polycis.modules.dev.entity.DeviceUplinkData">
+
+        SELECT *
+        FROM lo_device_uplink_data ldud
+        WHERE 1 =1
+
+        <if test="data.deviceUUId !=null and data.deviceUUId !=''" >
+            and ldud.device_uuid like "%"#{data.deviceUUId}"%"
+        </if>
+        <if  test="data.orgId !=null and data.orgId !='' ">
+        and ldud.app_id in
+            (
+            SELECT laor.app_id FROM lo_app_organization_relation laor
+            WHERE laor.organization_id = #{data.orgId}
+            )
+        </if>
+        <if test="data.appId !=null and data.appId !=''  ">
+            AND ldud.app_id =#{data.appId}
+        </if>
+        order by ldud.id desc
+        limit #{data.pageNum},#{data.pageSize}
+
+
+
+
+    </select>
+    <select id="selectUpDataListCount" resultType="java.lang.Integer">
+
+        SELECT count(*)
+        FROM lo_device_uplink_data ldud
+        WHERE 1 =1
+
+        <if test="data.deviceUUId !=null and data.deviceUUId !=''" >
+            and ldud.device_uuid like "%"#{data.deviceUUId}"%"
+        </if>
+        <if  test="data.orgId !=null and data.orgId !='' ">
+            and ldud.app_id in
+            (
+            SELECT laor.app_id FROM lo_app_organization_relation laor
+            WHERE laor.organization_id = #{data.orgId}
+            )
+        </if>
+        <if test="data.appId !=null and data.appId !=''  ">
+            AND ldud.app_id =#{data.appId}
+        </if>
+
+
+    </select>
+    <select id="selectUpDataListNoSuSys" resultType="cn.com.polycis.modules.dev.entity.DeviceUplinkData">
+        SELECT *
+        FROM lo_device_uplink_data ldud
+        WHERE
+        ldud.app_id in
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE laor.organization_id = #{data.org}
+        )
+
+        <if test="data.deviceUUId !=null and data.deviceUUId !=''" >
+            and ldud.device_uuid like "%"#{data.deviceUUId}"%"
+        </if>
+        <if  test="data.orgId !=null and data.orgId !='' ">
+            and ldud.app_id in
+            (
+            SELECT laor.app_id FROM lo_app_organization_relation laor
+            WHERE laor.organization_id = #{data.orgId}
+            )
+        </if>
+        <if test="data.appId !=null and data.appId !=''  ">
+            AND ldud.app_id =#{data.appId}
+        </if>
+        order by ldud.id desc
+        limit #{data.pageNum},#{data.pageSize}
+
+
+
+
+    </select>
+    <select id="selectUpDataListNoSuSysCount" resultType="java.lang.Integer">
+        SELECT count(*)
+        FROM lo_device_uplink_data ldud
+        WHERE
+        ldud.app_id in
+        (
+        SELECT laor.app_id FROM lo_app_organization_relation laor
+        WHERE laor.organization_id = #{data.org}
+        )
+
+        <if test="data.deviceUUId !=null and data.deviceUUId !=''" >
+            and ldud.device_uuid like "%"#{data.deviceUUId}"%"
+        </if>
+        <if  test="data.orgId !=null and data.orgId !='' ">
+            and ldud.app_id in
+            (
+            SELECT laor.app_id FROM lo_app_organization_relation laor
+            WHERE laor.organization_id = #{data.orgId}
+            )
+        </if>
+        <if test="data.appId !=null and data.appId !=''  ">
+            AND ldud.app_id =#{data.appId}
+        </if>
+
+
+
+    </select>
+
+
+</mapper>
