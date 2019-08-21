@@ -1,0 +1,17 @@
+spring:
+  rabbitmq:
+    host: 47.93.172.30
+    port: 5672
+    username: rabbitmq
+    password: 12345qwert
+    publisher-confirms: true #只确认消息是否正确到达 Exchange 中
+    publisher-returns: true  #消息没有正确到达队列时触发回调，如果正确到达队列不执行
+    listener:
+      simple:
+        acknowledge-mode: auto  # manual:作为消费者手动确认消息被消费,auto:自动确认消息
+        concurrency: 1
+        max-concurrency: 1
+        retry:
+          enabled: true
+server:
+  port: 8080
